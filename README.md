@@ -1,3 +1,8 @@
+Some assumptions/decisions made:
+    1. For modularizing the AccountTrigger code, the assignment isn't to extend the TriggerHandler, but to simply pull most of the logic out of the AccountTrigger.
+    2. Since that leaves the AccountTrigger simply calling methods in the Helper, I'm combining the 3 identical If Statements into 1, reducing code and operation.  Not sure if that's good practice or not, just making a call on this.
+
+
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=16216963&assignment_repo_type=AssignmentRepo)
 # Developer Kickstart: Advanced Trigger Techniques
 
