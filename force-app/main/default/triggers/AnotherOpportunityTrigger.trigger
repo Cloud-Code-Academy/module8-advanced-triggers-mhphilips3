@@ -33,12 +33,20 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
                     oldOpp.addError('Cannot delete closed opportunity');
                 }
             }
+        } else if (Trigger.isUpdate){
+            // 4. Append Stage changes in Opportunity Description
+            for (Opportunity opp : Trigger.new){                
+                if (opp.StageName != null && opp.StageName != Trigger.oldMap.get(opp.Id).StageName){
+                    opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();
+                }                                
+            }        
         }
     }
 
     if (Trigger.isAfter){
         if (Trigger.isInsert){
             // 3. Create a new Task for newly inserted Opportunities
+            List<Task> taskList = new List<Task>();
             for (Opportunity opp : Trigger.new){
                 Task tsk = new Task();
                 tsk.Subject = 'Call Primary Contact';
@@ -46,19 +54,10 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
                 tsk.WhoId = opp.Primary_Contact__c;
                 tsk.OwnerId = opp.OwnerId;
                 tsk.ActivityDate = Date.today().addDays(3);
-                insert tsk;
+                taskList.add(tsk);
             }
-        } else if (Trigger.isUpdate){
-            // 4. Append Stage changes in Opportunity Description
-            for (Opportunity opp : Trigger.new){
-                for (Opportunity oldOpp : Trigger.old){
-                    if (opp.StageName != null){
-                        opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();
-                    }
-                }                
-            }
-            update Trigger.new;
-        }
+            insert taskList;
+        } 
         // 5. Send email notifications when an Opportunity is deleted 
         else if (Trigger.isDelete){
             notifyOwnersOpportunityDeleted(Trigger.old);
@@ -76,10 +75,12 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     */
     private static void notifyOwnersOpportunityDeleted(List<Opportunity> opps) {
         List<Messaging.SingleEmailMessage> mails = new List<Messaging.SingleEmailMessage>();
-        for (Opportunity opp : opps){
+        List<Opportunity> oppsWithOwnersList = new List<Opportunity>([SELECT Id, OwnerId, Name,
+                                                                    Owner.Email FROM Opportunity WHERE Id IN :opps]);
+        for (Opportunity opp : oppsWithOwnersList){
             Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-            String[] toAddresses = new String[] {[SELECT Id, Email FROM User WHERE Id = :opp.OwnerId].Email};
-            mail.setToAddresses(toAddresses);
+            List<String> setToAddresses = new List<String>{opp.Owner.Email};
+            mail.setToAddresses(setToAddresses);
             mail.setSubject('Opportunity Deleted : ' + opp.Name);
             mail.setPlainTextBody('Your Opportunity: ' + opp.Name +' has been deleted.');
             mails.add(mail);
