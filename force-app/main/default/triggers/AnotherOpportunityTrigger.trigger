@@ -64,7 +64,7 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     //         }
     //         insert taskList;
     //     } 
-    //     // 5. Send email notifications when an Opportunity is deleted 
+    //     // 5. Send email notifications when an Opportunity is deleted   MOVED ALL LOGIC IN METHOD TO OPPTRIGGHANDLER
     //     else if (Trigger.isDelete){
     //         notifyOwnersOpportunityDeleted(Trigger.old);
     //     } 

@@ -49,4 +49,25 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
         }
         insert taskList;
     }
+    public override void afterDelete(){
+        // Sends an email notification to the owner of the Opportunity when it gets deleted.
+        List<Messaging.SingleEmailMessage> mails = new List<Messaging.SingleEmailMessage>();
+        List<Opportunity> oppsWithOwnersList = new List<Opportunity>([SELECT Id, OwnerId, Name,
+                                                                    Owner.Email FROM Opportunity WHERE Id IN :oldOppList]);
+        for (Opportunity opp : oppsWithOwnersList){
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            List<String> setToAddresses = new List<String>{opp.Owner.Email};
+            mail.setToAddresses(setToAddresses);
+            mail.setSubject('Opportunity Deleted : ' + opp.Name);
+            mail.setPlainTextBody('Your Opportunity: ' + opp.Name +' has been deleted.');
+            mails.add(mail);
+        }        
+        
+        try {
+            Messaging.sendEmail(mails);
+        } catch (Exception e){
+            System.debug('Exception: ' + e.getMessage());
+        }
+    }
+
 }
