@@ -1,9 +1,11 @@
 public with sharing class OpportunityTriggerHandler extends TriggerHandler{
     
     private List<Opportunity> newOppList;
+    private List<Opportunity> oldOppList;
     
     public OpportunityTriggerHandler() {
         this.newOppList = (List<Opportunity>)Trigger.new;
+        this.oldOppList = (List<Opportunity>)Trigger.old;
 
     }
 
@@ -14,5 +16,13 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
                 opp.Type = 'New Customer';
             }
         }        
+    }
+    public override void beforeDelete(){
+        // Prevent deletion of closed Opportunities
+        for (Opportunity oldOpp : oldOppList){
+            if (oldOpp.IsClosed){
+                oldOpp.addError('Cannot delete closed opportunity');
+            }
+        }
     }
 }
