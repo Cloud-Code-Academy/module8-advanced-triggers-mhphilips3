@@ -23,13 +23,13 @@ trigger OpportunityTrigger on Opportunity (before update, after update, before d
     * When an opportunity is updated validate that the amount is greater than 5000.
     * Trigger should only fire on update.
     */
-    if (Trigger.isUpdate && Trigger.isBefore){
-        for(Opportunity opp : Trigger.new){
-            if(opp.Amount < 5000){
-                opp.addError('Opportunity amount must be greater than 5000');
-            }
-        }
-    }
+    // if (Trigger.isUpdate && Trigger.isBefore){             MOVED TO OPPTRIGGHANDLER
+    //     for(Opportunity opp : Trigger.new){
+    //         if(opp.Amount < 5000){
+    //             opp.addError('Opportunity amount must be greater than 5000');
+    //         }
+    //     }
+    // }
 
     /*
     * Opportunity Trigger

@@ -30,9 +30,12 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
         }
     }
     public override void beforeUpdate(){
-        // Append Stage changes in Opportunity Description
-        for (Opportunity opp : newOppList){                
-            if (opp.StageName != null && opp.StageName != oldOppMap.get(opp.Id).StageName){
+        for (Opportunity opp : newOppList){ 
+            // When an opportunity is updated validate that the amount is greater than 5000.               
+            if(opp.Amount < 5000){
+                opp.addError('Opportunity amount must be greater than 5000');
+            // Append Stage changes in Opportunity Description
+            } else if (opp.StageName != null && opp.StageName != oldOppMap.get(opp.Id).StageName){
                 opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();
             }                                
         }
