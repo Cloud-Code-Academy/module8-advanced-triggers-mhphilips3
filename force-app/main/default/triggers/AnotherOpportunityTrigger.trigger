@@ -68,7 +68,7 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     //     else if (Trigger.isDelete){
     //         notifyOwnersOpportunityDeleted(Trigger.old);
     //     } 
-    //     // 6. Assign the primary contact to undeleted Opportunities
+    //     // 6. Assign the primary contact to undeleted Opportunities  MOVED ALL LOGIC IN METHOD TO OPPTRIGGHANDLER
     //     else if (Trigger.isUndelete){
     //         assignPrimaryContact(Trigger.newMap);
     //     }

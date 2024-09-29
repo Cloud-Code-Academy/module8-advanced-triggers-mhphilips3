@@ -3,11 +3,13 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
     private List<Opportunity> newOppList;
     private List<Opportunity> oldOppList;
     private Map<Id, Opportunity> oldOppMap;
+    private Map<Id, Opportunity> newOppMap;
     
     public OpportunityTriggerHandler() {
         this.newOppList = (List<Opportunity>)Trigger.new;
         this.oldOppList = (List<Opportunity>)Trigger.old;
         this.oldOppMap = (Map<Id, Opportunity>)Trigger.oldMap;
+        this.newOppMap = (Map<Id, Opportunity>)Trigger.newMap;
 
     }
 
@@ -69,5 +71,23 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
             System.debug('Exception: ' + e.getMessage());
         }
     }
-
+    public override void afterUndelete(){
+        // Assign the primary contact to undeleted Opportunities
+        Set <Id> accIdSet = new Set<Id>();
+        for (Opportunity opp : newOppList){
+            accIdSet.add(opp.AccountId);
+        }
+        Map<Id, Account> acctMap = new Map<Id, Account> ([SELECT Id, Name,
+                                                        (SELECT Id, AccountId FROM Contacts WHERE Title ='VP Sales')
+                                                        FROM Account WHERE Id IN :accIdSet]);
+        List<Opportunity> oppList = new List<Opportunity>();
+        for (Opportunity opp : newOppList){       
+            if (opp.Primary_Contact__c == null && !acctMap.get(opp.AccountId).Contacts.isEmpty()){
+                Opportunity oppToUpdate = new Opportunity(Id = opp.Id);
+                oppToUpdate.Primary_Contact__c = acctMap.get(opp.AccountId).Contacts[0].Id;
+                oppList.add(oppToUpdate);
+            }
+        }
+        update oppList;
+    }
 }
