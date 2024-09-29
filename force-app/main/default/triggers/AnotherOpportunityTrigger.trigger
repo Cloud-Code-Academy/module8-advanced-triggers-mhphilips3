@@ -22,9 +22,10 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     if (Trigger.isBefore){
         if (Trigger.isInsert){
             // 1. Set default Type for new Opportunities
-            Opportunity opp = Trigger.new[0];
-            if (opp.Type == null){
-                opp.Type = 'New Customer';
+            for (Opportunity opp : Trigger.new){
+                if (opp.Type == null){
+                    opp.Type = 'New Customer';
+                }
             }        
         } else if (Trigger.isDelete){
             // 2. Prevent deletion of closed Opportunities
