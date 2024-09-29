@@ -26,13 +26,13 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     
     // if (Trigger.isBefore){
     //     if (Trigger.isInsert){
-    //         // 1. Set default Type for new Opportunities
+    //         // 1. Set default Type for new Opportunities     MOVED TO OPPTRIGGHANDLER
     //         for (Opportunity opp : Trigger.new){
     //             if (opp.Type == null){
     //                 opp.Type = 'New Customer';
     //             }
     //         }        
-    //     } else if (Trigger.isDelete){
+    //     } else if (Trigger.isDelete){                        MODED TO OPPTRIGGHANDLER
     //         // 2. Prevent deletion of closed Opportunities
     //         for (Opportunity oldOpp : Trigger.old){
     //             if (oldOpp.IsClosed){
@@ -51,7 +51,7 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
 
     // if (Trigger.isAfter){
     //     if (Trigger.isInsert){
-    //         // 3. Create a new Task for newly inserted Opportunities
+    //         // 3. Create a new Task for newly inserted Opportunities  MOVED TO OPPTRIGGHANDLER
     //         List<Task> taskList = new List<Task>();
     //         for (Opportunity opp : Trigger.new){
     //             Task tsk = new Task();

@@ -25,4 +25,18 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
             }
         }
     }
+    public override void afterInsert(){
+        // Create a new Task for newly inserted Opportunities
+        List<Task> taskList = new List<Task>();
+        for (Opportunity opp : newOppList){
+            Task tsk = new Task();
+            tsk.Subject = 'Call Primary Contact';
+            tsk.WhatId = opp.Id;
+            tsk.WhoId = opp.Primary_Contact__c;
+            tsk.OwnerId = opp.OwnerId;
+            tsk.ActivityDate = Date.today().addDays(3);
+            taskList.add(tsk);
+        }
+        insert taskList;
+    }
 }
