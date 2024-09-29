@@ -21,13 +21,13 @@ https://developer.salesforce.com/blogs/developer-relations/2015/01/apex-best-pra
 trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, before update, after update, before delete, after delete, after undelete) {
     if (Trigger.isBefore){
         if (Trigger.isInsert){
-            // Set default Type for new Opportunities
+            // 1. Set default Type for new Opportunities
             Opportunity opp = Trigger.new[0];
             if (opp.Type == null){
                 opp.Type = 'New Customer';
             }        
         } else if (Trigger.isDelete){
-            // Prevent deletion of closed Opportunities
+            // 2. Prevent deletion of closed Opportunities
             for (Opportunity oldOpp : Trigger.old){
                 if (oldOpp.IsClosed){
                     oldOpp.addError('Cannot delete closed opportunity');
@@ -38,7 +38,7 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
 
     if (Trigger.isAfter){
         if (Trigger.isInsert){
-            // Create a new Task for newly inserted Opportunities
+            // 3. Create a new Task for newly inserted Opportunities
             for (Opportunity opp : Trigger.new){
                 Task tsk = new Task();
                 tsk.Subject = 'Call Primary Contact';
@@ -49,7 +49,7 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
                 insert tsk;
             }
         } else if (Trigger.isUpdate){
-            // Append Stage changes in Opportunity Description
+            // 4. Append Stage changes in Opportunity Description
             for (Opportunity opp : Trigger.new){
                 for (Opportunity oldOpp : Trigger.old){
                     if (opp.StageName != null){
@@ -59,11 +59,11 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
             }
             update Trigger.new;
         }
-        // Send email notifications when an Opportunity is deleted 
+        // 5. Send email notifications when an Opportunity is deleted 
         else if (Trigger.isDelete){
             notifyOwnersOpportunityDeleted(Trigger.old);
         } 
-        // Assign the primary contact to undeleted Opportunities
+        // 6. Assign the primary contact to undeleted Opportunities
         else if (Trigger.isUndelete){
             assignPrimaryContact(Trigger.newMap);
         }
@@ -98,15 +98,21 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     - Only updates the Opportunities that don't already have a primary contact.
     */
     private static void assignPrimaryContact(Map<Id,Opportunity> oppNewMap) {        
-        Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>();
-        for (Opportunity opp : oppNewMap.values()){            
-            Contact primaryContact = [SELECT Id, AccountId FROM Contact WHERE Title = 'VP Sales' AND AccountId = :opp.AccountId LIMIT 1];
-            if (opp.Primary_Contact__c == null){
+        Set <Id> accIdSet = new Set<Id>();
+        for (Opportunity opp : oppNewMap.values()){
+            accIdSet.add(opp.AccountId);
+        }
+        Map<Id, Account> acctMap = new Map<Id, Account> ([SELECT Id, Name,
+                                                        (SELECT Id, AccountId FROM Contacts WHERE Title ='VP Sales')
+                                                        FROM Account WHERE Id IN :accIdSet]);
+        List<Opportunity> oppList = new List<Opportunity>();
+        for (Opportunity opp : oppNewMap.values()){       
+            if (opp.Primary_Contact__c == null && !acctMap.get(opp.AccountId).Contacts.isEmpty()){
                 Opportunity oppToUpdate = new Opportunity(Id = opp.Id);
-                oppToUpdate.Primary_Contact__c = primaryContact.Id;
-                oppMap.put(opp.Id, oppToUpdate);
+                oppToUpdate.Primary_Contact__c = acctMap.get(opp.AccountId).Contacts[0].Id;
+                oppList.add(oppToUpdate);
             }
         }
-        update oppMap.values();
+        update oppList;
     }
 }
