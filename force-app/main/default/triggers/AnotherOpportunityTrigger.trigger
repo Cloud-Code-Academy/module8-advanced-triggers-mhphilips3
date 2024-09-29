@@ -40,7 +40,7 @@ trigger AnotherOpportunityTrigger on Opportunity (before insert, after insert, b
     //             }
     //         }
     //     } else if (Trigger.isUpdate){
-    //         // 4. Append Stage changes in Opportunity Description
+    //         // 4. Append Stage changes in Opportunity Description        MOVED TO OPPTRIGGHANDLER
     //         for (Opportunity opp : Trigger.new){                
     //             if (opp.StageName != null && opp.StageName != Trigger.oldMap.get(opp.Id).StageName){
     //                 opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();

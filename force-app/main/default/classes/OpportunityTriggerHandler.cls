@@ -2,10 +2,12 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
     
     private List<Opportunity> newOppList;
     private List<Opportunity> oldOppList;
+    private Map<Id, Opportunity> oldOppMap;
     
     public OpportunityTriggerHandler() {
         this.newOppList = (List<Opportunity>)Trigger.new;
         this.oldOppList = (List<Opportunity>)Trigger.old;
+        this.oldOppMap = (Map<Id, Opportunity>)Trigger.oldMap;
 
     }
 
@@ -23,6 +25,14 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
             if (oldOpp.IsClosed){
                 oldOpp.addError('Cannot delete closed opportunity');
             }
+        }
+    }
+    public override void beforeUpdate(){
+        // Append Stage changes in Opportunity Description
+        for (Opportunity opp : newOppList){                
+            if (opp.StageName != null && opp.StageName != oldOppMap.get(opp.Id).StageName){
+                opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();
+            }                                
         }
     }
     public override void afterInsert(){
