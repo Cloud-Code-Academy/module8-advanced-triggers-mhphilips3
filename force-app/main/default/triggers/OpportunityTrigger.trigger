@@ -15,7 +15,7 @@ For this lesson, students have two options:
 
 Remember, whichever option you choose, ensure that the trigger is activated and tested to validate its functionality.
 */
-trigger OpportunityTrigger on Opportunity (before update, after update, before delete) {
+trigger OpportunityTrigger on Opportunity (after update) {
 
     
     /*
