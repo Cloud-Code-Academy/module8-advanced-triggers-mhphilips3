@@ -32,14 +32,43 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
         }
     }
     public override void beforeUpdate(){
+        
+        Set<Id> accountIds = new Set<Id>(); // used in logic to set Primary Contact
+        Set<Opportunity> oppSet = new Set<Opportunity>(); // used in logic to set Primary Contact
         for (Opportunity opp : newOppList){ 
             // When an opportunity is updated validate that the amount is greater than 5000.               
             if(opp.Amount < 5000){
                 opp.addError('Opportunity amount must be greater than 5000');
-            // Append Stage changes in Opportunity Description
-            } else if (opp.StageName != null && opp.StageName != oldOppMap.get(opp.Id).StageName){
-                opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();
+            } else {
+                // Append Stage changes in Opportunity Description
+                if (opp.StageName != null && opp.StageName != oldOppMap.get(opp.Id).StageName){
+                    opp.Description += '\n Stage Change:' + opp.StageName + ':' + DateTime.now().format();
+                }
+                //When an opportunity is updated set the primary contact on the opportunity 
+                //to the contact with the title of 'CEO'.
+                //Get contacts related to the opportunity account                
+                oppSet.add(opp);                // Creates set of opps that passed validation
+                accountIds.add(opp.AccountId); // Creates Id set for Accts related to these opps
             }                                
+        }               //Get CEO Contacts related to associated Accounts        
+        Map<Id, Contact> contacts = new Map<Id, Contact>([SELECT Id, FirstName, AccountId
+                                                            FROM Contact 
+                                                            WHERE AccountId IN :accountIds 
+                                                            AND Title = 'CEO' ORDER BY FirstName ASC]);
+        Map<Id, Contact> accountIdToContact = new Map<Id, Contact>();
+        // Fill accountIdToContact Map 
+        for (Contact cont : contacts.values()) {
+            if (!accountIdToContact.containsKey(cont.AccountId)) {
+                accountIdToContact.put(cont.AccountId, cont);
+            }
+        }
+        // Set Primary Contact for opps that don't already have one set
+        for(Opportunity opp : oppSet){
+            if(opp.Primary_Contact__c == null){
+                if (accountIdToContact.containsKey(opp.AccountId)){
+                    opp.Primary_Contact__c = accountIdToContact.get(opp.AccountId).Id;
+                }
+            }
         }
     }
     public override void afterInsert(){
