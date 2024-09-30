@@ -181,21 +181,20 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
             accIdSet.add(opp.AccountId);
         }
 
-        // Query for Accounts and their Contacts with the title 'VP Sales'
-        Map<Id, Account> acctMap = new Map<Id, Account> ([SELECT Id, Name,
-                                                        (SELECT Id, AccountId FROM Contacts WHERE Title ='VP Sales')
-                                                        FROM Account WHERE Id IN :accIdSet]);
-        
-        // Set the Primary Contact to the 'VP Sales' if no Primary Contact is set
-        List<Opportunity> oppList = new List<Opportunity>();
-        for (Opportunity opp : newOppList){       
-            if (opp.Primary_Contact__c == null && !acctMap.get(opp.AccountId).Contacts.isEmpty()){
-                Opportunity oppToUpdate = new Opportunity(Id = opp.Id);
-                oppToUpdate.Primary_Contact__c = acctMap.get(opp.AccountId).Contacts[0].Id;
-                oppList.add(oppToUpdate);
-            }
-        }
-
+        // Query for Accounts and their specific Contacts with the title 'VP Sales'
+        System.debug(accIdSet.size());
+        Map<Id, Account> accMap = OpportunityUtils.getAccountsWithContactsByTitle(accIdSet, 'VP Sales');    
+        System.debug('++++ accMap size ' + accMap.size());
+        // Set the Primary Contact on Opps if no Primary Contact is set
+        List<Opportunity> oppList = OpportunityUtils.setPrimaryContactForOpportunities(newOppList, accMap);
+        // for (Opportunity opp : newOppList){       
+        //     if (opp.Primary_Contact__c == null && !accMap.get(opp.AccountId).Contacts.isEmpty()){
+        //         Opportunity oppToUpdate = new Opportunity(Id = opp.Id);
+        //         oppToUpdate.Primary_Contact__c = accMap.get(opp.AccountId).Contacts[0].Id;
+        //         oppList.add(oppToUpdate);
+        //     }
+        // }
+        System.debug('++++ oppList: ' + oppList.size() + oppList);
         // Bulk update the Opportunities with the new Primary Contacts
         update oppList;
     }
