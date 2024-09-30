@@ -3,6 +3,9 @@ Some assumptions/decisions made:
     2. Since that leaves the AccountTrigger simply calling methods in the Helper, I'm combining the 3 identical If Statements into 1, reducing code and operation.  Not sure if that's good practice or not, just making a call on this.
     3. For the trigger: Append Stage changes in Opportunity Description, which was originally After Update, this makes no sense.  I moved that to before update, which is a more proper position for this kind of update (unless I'm not understanding some requirement).
     4. In Part 3, I have used AnotherOpportunityTrigger.trigger as the sole operating trigger for the org.  I've made this move in stages, which can be traced in my (likely too many) commits.  In presenting final products, I've adjusted all commenting and removed previous code entirely from this file rather than merely comment that out.
+    5. For the two before delete pieces of logic.  To combine these, I chose to simply keep the broader logic, which preventing deleting closed cases, as the validation to prevent certain Closed Won cases from being deleted was already accomplished with the first trigger.  
+        Was unsure about this, as best practice might be to code the other piece in as well in case the first validation was changed in the future????
+    6.  
 
 
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=16216963&assignment_repo_type=AssignmentRepo)

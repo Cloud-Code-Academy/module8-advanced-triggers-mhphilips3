@@ -22,11 +22,13 @@ public with sharing class OpportunityTriggerHandler extends TriggerHandler{
         }        
     }
     public override void beforeDelete(){
-        // Prevent deletion of closed Opportunities
+        // Prevents deletion of all closed Opportunities. 
+        // Note: This covers a previous rule preventing deletion of Closed Won Opportunities for Banking accounts. 
+        // If the rule for closed Opportunities changes, revisit the Banking-specific requirement.
         for (Opportunity oldOpp : oldOppList){
             if (oldOpp.IsClosed){
                 oldOpp.addError('Cannot delete closed opportunity');
-            }
+            }    
         }
     }
     public override void beforeUpdate(){
