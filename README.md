@@ -1,3 +1,14 @@
+Some assumptions/decisions made:
+    1. For modularizing the AccountTrigger code, the assignment isn't to extend the TriggerHandler, but to simply pull most of the logic out of the AccountTrigger.
+    2. Since that leaves the AccountTrigger simply calling methods in the Helper, I'm combining the 3 identical If Statements into 1, reducing code and operation.  Not sure if that's good practice or not, just making a call on this.
+    3. For the trigger: Append Stage changes in Opportunity Description, which was originally After Update, this makes no sense.  I moved that to before update, which is a more proper position for this kind of update (unless I'm not understanding some requirement).
+    4. In Part 3, I have used AnotherOpportunityTrigger.trigger as the sole operating trigger for the org.  I've made this move in stages, which can be traced in my (likely too many) commits.  In presenting final products, I've adjusted all commenting and removed previous code entirely from this file rather than merely comment that out.
+    5. For the two before delete pieces of logic.  To combine these, I chose to simply keep the broader logic, which preventing deleting closed cases, as the validation to prevent certain Closed Won cases from being deleted was already accomplished with the first trigger.  
+        Was unsure about this, as best practice might be to code the other piece in as well in case the first validation was changed in the future????
+    6. The intention was initially to accept the extra Credit assignment of modularizing the OpportunityTriggerHandler class into the OpportunityUtils class.  I began doing that, but got radically bogged down trying to successfully modularize the two requirements of setting the Primary Contact field on the Opp records.  I had to revert to a previous spot.  I did pull both of those processes into the Util class, mainly because I was left with a complexity warning in the before update method if I had left that in.  That said, my work spreads out into the OpportunityUtils class, but I recognize this is just pulling code out, not really modularizing. 
+
+
+[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=16216963&assignment_repo_type=AssignmentRepo)
 # Developer Kickstart: Advanced Trigger Techniques
 
 This repository is an integral part of the Developer Kickstart curriculum at Cloud Code Academy. Designed specifically for budding Salesforce developers, this module delves deep into the realm of triggers, emphasizing advanced best practices, the utility of trigger helpers, and the integration of trigger frameworks.

@@ -28,19 +28,59 @@ Always ensure that your helper methods are bulk-safe to handle multiple records 
 */
 public with sharing class AccountHelper {
     
-    public void setTypeProspect(SObject objects){
-
+    //Update the 'Type' field of the given Account record to 'Prospect' if it's not already set.
+    public static void setTypeProspect(List<Account> newAccounts){
+        for (Account acc : newAccounts) {
+            if (acc.Type == null) {
+                acc.Type = 'Prospect';
+            }
+        }
     }
 
-    void addressCopy(){
+    //Copy the shipping address of the Account to its billing address.
+    public static void addressCopy(List<Account> newAccounts){
+        for (Account acc : newAccounts) {
+            if (acc.ShippingStreet != null) {
+                acc.BillingStreet = acc.ShippingStreet;
+            }
 
+            if (acc.ShippingCity != null) {
+                acc.BillingCity = acc.ShippingCity;
+            }
+
+            if (acc.ShippingState != null) {
+                acc.BillingState = acc.ShippingState;
+            }
+
+            if (acc.ShippingPostalCode != null) {
+                acc.BillingPostalCode = acc.ShippingPostalCode;
+            }
+
+            if (acc.ShippingCountry != null) {
+                acc.BillingCountry = acc.ShippingCountry;
+            }
+        }
     }
 
-    //[public | private ] [static] data_type setRating (input parameters) {
-    //  The body of the method
-    //}
+    //Evaluate certain conditions on the Account and assign a rating based on that evaluation.
+    public static void setRating (List<Account> newAccounts) {
+        for (Account acc : newAccounts) {
+            if (acc.Phone != null && acc.Website != null && acc.Fax != null) {
+                acc.Rating = 'Hot';
+            }
+        }
+    }
 
-    //[public | private ] [static] data_type defaultContact (input parameters) {
-    //  The body of the method
-    //}
+    //Create a default contact related to the Account after the Account is inserted.
+    public static void defaultContact (List<Account> newAccounts) {
+        List<Contact> contacts = new List<Contact>();   
+        for(Account acc : newAccounts){
+            Contact con = new Contact();
+            con.LastName = 'DefaultContact';
+            con.Email = 'default@email.com';
+            con.AccountId = acc.Id;
+            contacts.add(con);
+        }
+        insert contacts;
+    }
 }
